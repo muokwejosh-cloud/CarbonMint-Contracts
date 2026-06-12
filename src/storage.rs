@@ -41,3 +41,33 @@ pub fn set_admin(env: &Env, admin: &Address) {
 pub fn get_admin(env: &Env) -> Option<Address> {
     env.storage().instance().get(&DataKey::Admin)
 }
+
+/// Reads the current batch counter (number of batches minted so far).
+pub fn get_batch_counter(env: &Env) -> u64 {
+    env.storage()
+        .instance()
+        .get(&DataKey::BatchCounter)
+        .unwrap_or(0)
+}
+
+/// Writes the batch counter.
+pub fn set_batch_counter(env: &Env, value: u64) {
+    env.storage()
+        .instance()
+        .set(&DataKey::BatchCounter, &value);
+}
+
+/// Reads the current retirement counter (number of certificates issued).
+pub fn get_retirement_counter(env: &Env) -> u64 {
+    env.storage()
+        .instance()
+        .get(&DataKey::RetirementCounter)
+        .unwrap_or(0)
+}
+
+/// Writes the retirement counter.
+pub fn set_retirement_counter(env: &Env, value: u64) {
+    env.storage()
+        .instance()
+        .set(&DataKey::RetirementCounter, &value);
+}
