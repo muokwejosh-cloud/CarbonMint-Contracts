@@ -80,9 +80,12 @@ The contract targets `wasm32-unknown-unknown` and is built as a `cdylib`.
 
 ```sh
 make build      # cargo build --target wasm32-unknown-unknown --release
+make check      # type-check all targets without producing a wasm
 make test       # run the unit test suite
 make fmt        # format the source tree
 make clippy     # lint with warnings denied
+make doc        # build the rustdoc API documentation
+make wasm-size  # build and print the compiled wasm size
 ```
 
 The compiled WASM is written to
