@@ -221,4 +221,14 @@ impl CarbonMintContract {
     pub fn total_retired(env: Env, batch_id: u64) -> i128 {
         storage::get_total_retired(&env, batch_id)
     }
+
+    /// Returns the number of batches minted so far (also the highest batch id).
+    pub fn batch_count(env: Env) -> u64 {
+        storage::get_batch_counter(&env)
+    }
+
+    /// Returns the number of retirement certificates issued so far.
+    pub fn retirement_count(env: Env) -> u64 {
+        storage::get_retirement_counter(&env)
+    }
 }
