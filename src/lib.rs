@@ -14,19 +14,28 @@ mod types;
 #[cfg(test)]
 mod test;
 
-use soroban_sdk::{contract, contractimpl, Address, Env, String};
+use soroban_sdk::{contract, contractimpl, contractmeta, Address, Env, String};
 
 pub use crate::error::Error;
 pub use crate::types::{Batch, Retirement};
+
+/// Monotonic on-chain version of the contract logic.
+pub const VERSION: u32 = 1;
+
+contractmeta!(key = "name", val = "CarbonMint");
+contractmeta!(
+    key = "desc",
+    val = "Tokenized carbon-credit marketplace for Stellar Soroban"
+);
 
 #[contract]
 pub struct CarbonMintContract;
 
 #[contractimpl]
 impl CarbonMintContract {
-    /// Returns the contract version string.
+    /// Returns the contract version number.
     pub fn version(_env: Env) -> u32 {
-        1
+        VERSION
     }
 
     /// Initializes the registry with an `admin` address.
