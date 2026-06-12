@@ -1,5 +1,25 @@
 use soroban_sdk::{contracttype, Address, String};
 
+/// Keys used to address values in contract storage.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum DataKey {
+    /// The registry admin address (instance storage).
+    Admin,
+    /// Counter for the next batch id (instance storage).
+    BatchCounter,
+    /// Counter for the next retirement certificate id (instance storage).
+    RetirementCounter,
+    /// A batch record keyed by batch id (persistent storage).
+    Batch(u64),
+    /// A balance keyed by (owner, batch id) (persistent storage).
+    Balance(Address, u64),
+    /// A retirement certificate keyed by certificate id (persistent storage).
+    Retirement(u64),
+    /// Running total of retired credits per batch (persistent storage).
+    TotalRetired(u64),
+}
+
 /// A registered batch of carbon credits.
 ///
 /// A batch is semi-fungible: every credit within the same batch is
