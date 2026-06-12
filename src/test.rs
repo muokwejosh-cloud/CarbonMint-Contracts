@@ -97,3 +97,29 @@ fn test_buy_transfers_balances() {
     assert_eq!(client.balance_of(&issuer, &id), 700);
     assert_eq!(client.balance_of(&buyer, &id), 300);
 }
+
+#[test]
+#[should_panic(expected = "Error(Contract, #5)")]
+fn test_buy_insufficient_balance_fails() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let issuer = Address::generate(&env);
+    let buyer = Address::generate(&env);
+    let id = client.mint_batch(&issuer, &project_id(&env), &2024, &100, &5);
+
+    // Seller only has 100 credits; buying 101 must fail.
+    client.buy(&buyer, &id, &101);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #3)")]
+fn test_buy_unknown_batch_fails() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let buyer = Address::generate(&env);
+    client.buy(&buyer, &999, &1);
+}
