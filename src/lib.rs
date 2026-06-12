@@ -58,11 +58,32 @@ impl CarbonMintContract {
         storage::get_admin(&env).ok_or(Error::NotInitialized)
     }
 
+    /// Pauses or unpauses minting. Only the registry admin may call this.
+    ///
+    /// While paused, [`mint_batch`](Self::mint_batch) rejects new mints with
+    /// [`Error::Paused`]; existing batches can still be traded and retired.
+    /// Requires authorization from the admin.
+    pub fn set_paused(env: Env, paused: bool) -> Result<(), Error> {
+        let admin = storage::get_admin(&env).ok_or(Error::NotInitialized)?;
+        admin.require_auth();
+
+        storage::set_paused(&env, paused);
+        storage::extend_instance(&env);
+
+        events::paused(&env, &admin, paused);
+        Ok(())
+    }
+
+    /// Returns whether minting is currently paused.
+    pub fn is_paused(env: Env) -> bool {
+        storage::get_paused(&env)
+    }
+
     /// Mints a new batch of carbon credits and returns its id.
     ///
     /// Requires authorization from `issuer`. The full `amount` is credited to
     /// the issuer's balance for the new batch. The batch is created listed at
-    /// the supplied `price`.
+    /// the supplied `price`. Returns [`Error::Paused`] while minting is paused.
     pub fn mint_batch(
         env: Env,
         issuer: Address,
@@ -73,6 +94,9 @@ impl CarbonMintContract {
     ) -> Result<u64, Error> {
         if !storage::has_admin(&env) {
             return Err(Error::NotInitialized);
+        }
+        if storage::get_paused(&env) {
+            return Err(Error::Paused);
         }
         issuer.require_auth();
 
