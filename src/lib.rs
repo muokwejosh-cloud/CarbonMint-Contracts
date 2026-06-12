@@ -103,4 +103,24 @@ impl CarbonMintContract {
     pub fn balance_of(env: Env, owner: Address, batch_id: u64) -> i128 {
         storage::get_balance(&env, &owner, batch_id)
     }
+
+    /// Lists `batch_id` for sale and/or updates its unit `price`.
+    ///
+    /// Only the batch issuer may call this. Requires authorization from the
+    /// issuer recorded on the batch.
+    pub fn list(env: Env, batch_id: u64, price: i128) -> Result<(), Error> {
+        let mut batch = storage::get_batch(&env, batch_id).ok_or(Error::BatchNotFound)?;
+        batch.issuer.require_auth();
+
+        if price < 0 {
+            return Err(Error::InvalidAmount);
+        }
+
+        batch.price = price;
+        batch.listed = true;
+        storage::set_batch(&env, &batch);
+
+        events::listed(&env, &batch.issuer, batch_id, price);
+        Ok(())
+    }
 }
