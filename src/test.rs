@@ -35,3 +35,24 @@ fn test_initialize_twice_fails() {
     client.initialize(&admin);
     client.initialize(&admin);
 }
+
+#[test]
+fn test_mint_batch_credits_issuer() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let issuer = Address::generate(&env);
+    let id = client.mint_batch(&issuer, &project_id(&env), &2024, &1_000, &5);
+    assert_eq!(id, 1);
+
+    let batch = client.get_batch(&id);
+    assert_eq!(batch.issuer, issuer);
+    assert_eq!(batch.vintage, 2024);
+    assert_eq!(batch.supply, 1_000);
+    assert_eq!(batch.price, 5);
+    assert!(batch.listed);
+
+    assert_eq!(client.balance_of(&issuer, &id), 1_000);
+    assert_eq!(client.batch_count(), 1);
+}
