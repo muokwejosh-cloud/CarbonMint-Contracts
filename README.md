@@ -26,12 +26,15 @@ Balances are keyed by `(owner, batch_id)`.
 | Function | Description |
 | --- | --- |
 | `initialize(admin)` | Sets the registry admin. Callable once. |
-| `mint_batch(issuer, project_id, vintage, amount, price) -> u64` | Registers a batch and credits the issuer; returns the new batch id. Requires issuer auth. |
+| `set_admin(new_admin)` | Rotates the registry admin. Requires current-admin auth. |
+| `set_paused(paused)` | Pauses or unpauses minting. Requires admin auth. |
+| `mint_batch(issuer, project_id, vintage, amount, price) -> u64` | Registers a batch and credits the issuer; returns the new batch id. Requires issuer auth; rejected while paused. |
 | `list(batch_id, price)` | Lists / reprices a batch. Requires issuer auth. |
 | `unlist(batch_id)` | Removes a batch from sale (price preserved). Requires issuer auth. |
 | `buy(buyer, batch_id, amount)` | Transfers credits from the seller to the buyer (mock payment). Requires buyer auth and a listed batch. |
-| `transfer(from, to, batch_id, amount)` | Transfers credits directly between holders, bypassing the listing. Requires `from` auth. |
+| `transfer(from, to, batch_id, amount)` | Transfers credits directly between holders, bypassing the listing. Requires `from` auth; `from` must differ from `to`. |
 | `retire(holder, batch_id, amount) -> u64` | Burns credits and issues a retirement certificate; returns the certificate id. Requires holder auth. |
+| `retire_for(holder, batch_id, amount, beneficiary) -> u64` | Like `retire`, but records a named beneficiary on the certificate. Requires holder auth. |
 
 ### Read-only
 
@@ -42,7 +45,10 @@ Balances are keyed by `(owner, batch_id)`.
 | `get_batch(batch_id) -> Batch` | The batch record. |
 | `get_retirement(cert_id) -> Retirement` | A retirement certificate. |
 | `is_listed(batch_id) -> bool` | Whether a batch is currently listed for sale. |
+| `listing_info(batch_id) -> Listing` | Compact sale view: seller, price, listed flag and available amount. |
+| `is_paused() -> bool` | Whether minting is currently paused. |
 | `total_retired(batch_id) -> i128` | Total credits retired for a batch. |
+| `total_minted() -> i128` | Cumulative credits minted across all batches. |
 | `circulating_supply(batch_id) -> i128` | Minted supply minus retired credits. |
 | `batch_count() -> u64` | Number of batches minted. |
 | `retirement_count() -> u64` | Number of certificates issued. |
@@ -60,6 +66,8 @@ Balances are keyed by `(owner, batch_id)`.
 | 6 | `Unauthorized` | Caller not permitted. |
 | 7 | `Overflow` | Arithmetic overflow. |
 | 8 | `NotListed` | Batch is not currently listed for sale. |
+| 9 | `Paused` | Minting is paused by the admin. |
+| 10 | `SameAccount` | Transfer source and destination are identical. |
 
 ## Events
 
@@ -73,6 +81,8 @@ Off-chain indexers can reconstruct registry state from these events:
 | `bought` | `buyer, seller` | `(batch_id, amount, price)` |
 | `transfer` | `from, to` | `(batch_id, amount)` |
 | `retired` | `holder` | `(batch_id, amount, certificate_id)` |
+| `paused` | `admin` | `paused` |
+| `adminset` | `old_admin` | `new_admin` |
 
 ## Build
 
