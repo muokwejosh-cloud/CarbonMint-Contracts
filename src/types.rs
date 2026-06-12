@@ -1,5 +1,9 @@
 use soroban_sdk::{contracttype, Address, String};
 
+/// Sentinel beneficiary string used when a retirement names no specific
+/// beneficiary (i.e. the holder retires on their own behalf).
+pub const SELF_BENEFICIARY: &str = "self";
+
 /// Keys used to address values in contract storage.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -79,4 +83,8 @@ pub struct Retirement {
     pub holder: Address,
     /// The amount of credits retired.
     pub amount: i128,
+    /// Human-readable beneficiary the retirement is claimed on behalf of.
+    ///
+    /// Defaults to [`SELF_BENEFICIARY`] when the holder retires for themselves.
+    pub beneficiary: String,
 }

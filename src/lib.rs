@@ -293,6 +293,7 @@ impl CarbonMintContract {
             batch_id,
             holder: holder.clone(),
             amount,
+            beneficiary: String::from_str(&env, types::SELF_BENEFICIARY),
         };
         storage::set_retirement(&env, &cert);
         storage::set_retirement_counter(&env, cert_id);
