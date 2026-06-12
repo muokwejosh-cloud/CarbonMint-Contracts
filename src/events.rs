@@ -75,3 +75,11 @@ pub fn paused(env: &Env, admin: &Address, paused: bool) {
     let topics = (symbol_short!("paused"), admin.clone());
     env.events().publish(topics, paused);
 }
+
+/// Publishes an `adminset` event when the registry admin is rotated.
+///
+/// Topics: `("adminset", old_admin)`; data: `new_admin`.
+pub fn admin_set(env: &Env, old_admin: &Address, new_admin: &Address) {
+    let topics = (symbol_short!("adminset"), old_admin.clone());
+    env.events().publish(topics, new_admin.clone());
+}

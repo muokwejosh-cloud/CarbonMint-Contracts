@@ -58,6 +58,22 @@ impl CarbonMintContract {
         storage::get_admin(&env).ok_or(Error::NotInitialized)
     }
 
+    /// Rotates the registry admin to `new_admin`.
+    ///
+    /// Only the current admin may call this. Requires authorization from the
+    /// current admin. Returns [`Error::NotInitialized`] if the contract has not
+    /// been set up.
+    pub fn set_admin(env: Env, new_admin: Address) -> Result<(), Error> {
+        let current = storage::get_admin(&env).ok_or(Error::NotInitialized)?;
+        current.require_auth();
+
+        storage::set_admin(&env, &new_admin);
+        storage::extend_instance(&env);
+
+        events::admin_set(&env, &current, &new_admin);
+        Ok(())
+    }
+
     /// Pauses or unpauses minting. Only the registry admin may call this.
     ///
     /// While paused, [`mint_batch`](Self::mint_batch) rejects new mints with
