@@ -278,6 +278,20 @@ fn test_transfer_insufficient_balance_fails() {
 }
 
 #[test]
+#[should_panic(expected = "Error(Contract, #10)")]
+fn test_transfer_to_self_fails() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let issuer = Address::generate(&env);
+    let id = client.mint_batch(&issuer, &project_id(&env), &2024, &1_000, &5);
+
+    // Transferring to oneself is rejected and leaves the balance untouched.
+    client.transfer(&issuer, &issuer, &id, &10);
+}
+
+#[test]
 fn test_unlist_marks_batch_not_listed() {
     let (env, client, admin) = setup();
     env.mock_all_auths();
