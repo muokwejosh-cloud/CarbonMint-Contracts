@@ -118,6 +118,28 @@ pub fn set_balance(env: &Env, owner: &Address, batch_id: u64, amount: i128) {
     extend_persistent(env, &key);
 }
 
+/// Moves `amount` credits of `batch_id` from `from` to `to`.
+///
+/// Returns `false` without writing anything if `from` holds fewer than
+/// `amount` credits or if either side would overflow `i128`; otherwise both
+/// balances are updated and `true` is returned. `amount` is assumed to be
+/// positive (validated by callers).
+pub fn move_balance(env: &Env, from: &Address, to: &Address, batch_id: u64, amount: i128) -> bool {
+    let from_balance = get_balance(env, from, batch_id);
+    if from_balance < amount {
+        return false;
+    }
+    let to_balance = get_balance(env, to, batch_id);
+    match (from_balance.checked_sub(amount), to_balance.checked_add(amount)) {
+        (Some(new_from), Some(new_to)) => {
+            set_balance(env, from, batch_id, new_from);
+            set_balance(env, to, batch_id, new_to);
+            true
+        }
+        _ => false,
+    }
+}
+
 /// Reads a retirement certificate by id.
 pub fn get_retirement(env: &Env, id: u64) -> Option<Retirement> {
     let key = DataKey::Retirement(id);

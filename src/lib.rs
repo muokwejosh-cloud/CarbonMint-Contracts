@@ -172,21 +172,12 @@ impl CarbonMintContract {
         }
         let seller = batch.issuer.clone();
 
-        let seller_balance = storage::get_balance(&env, &seller, batch_id);
-        if seller_balance < amount {
+        if storage::get_balance(&env, &seller, batch_id) < amount {
             return Err(Error::InsufficientBalance);
         }
-
-        let new_seller = seller_balance
-            .checked_sub(amount)
-            .ok_or(Error::Overflow)?;
-        let buyer_balance = storage::get_balance(&env, &buyer, batch_id);
-        let new_buyer = buyer_balance
-            .checked_add(amount)
-            .ok_or(Error::Overflow)?;
-
-        storage::set_balance(&env, &seller, batch_id, new_seller);
-        storage::set_balance(&env, &buyer, batch_id, new_buyer);
+        if !storage::move_balance(&env, &seller, &buyer, batch_id, amount) {
+            return Err(Error::Overflow);
+        }
 
         events::bought(&env, &buyer, &seller, batch_id, amount, batch.price);
         Ok(())
