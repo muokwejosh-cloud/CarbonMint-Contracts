@@ -138,9 +138,11 @@ impl CarbonMintContract {
 
     /// Buys `amount` credits of `batch_id` from the batch issuer/seller.
     ///
-    /// Requires authorization from `buyer`. Payment is mocked: this transfers
-    /// credits from the seller to the buyer and emits a `bought` event with the
-    /// quoted price, but does not move an underlying payment asset.
+    /// Requires authorization from `buyer` and that the batch is currently
+    /// listed (otherwise [`Error::NotListed`]). Payment is mocked: this
+    /// transfers credits from the seller to the buyer and emits a `bought`
+    /// event with the quoted price, but does not move an underlying payment
+    /// asset.
     pub fn buy(env: Env, buyer: Address, batch_id: u64, amount: i128) -> Result<(), Error> {
         buyer.require_auth();
 
@@ -149,6 +151,9 @@ impl CarbonMintContract {
         }
 
         let batch = storage::get_batch(&env, batch_id).ok_or(Error::BatchNotFound)?;
+        if !batch.listed {
+            return Err(Error::NotListed);
+        }
         let seller = batch.issuer.clone();
 
         let seller_balance = storage::get_balance(&env, &seller, batch_id);

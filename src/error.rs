@@ -19,4 +19,6 @@ pub enum Error {
     Unauthorized = 6,
     /// An arithmetic operation overflowed.
     Overflow = 7,
+    /// The batch is not currently listed for sale.
+    NotListed = 8,
 }
