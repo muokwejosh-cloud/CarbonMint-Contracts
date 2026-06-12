@@ -1,7 +1,8 @@
 //! Event publishers for the CarbonMint contract.
 //!
 //! Each marketplace action emits a structured event so off-chain indexers can
-//! reconstruct registry state: `minted`, `listed`, `bought`, and `retired`.
+//! reconstruct registry state: `minted`, `listed`, `delisted`, `bought`,
+//! `transfer`, `retired`, and `paused`.
 
 use soroban_sdk::{symbol_short, Address, Env};
 
@@ -65,4 +66,12 @@ pub fn delisted(env: &Env, issuer: &Address, batch_id: u64) {
 pub fn transferred(env: &Env, from: &Address, to: &Address, batch_id: u64, amount: i128) {
     let topics = (symbol_short!("transfer"), from.clone(), to.clone());
     env.events().publish(topics, (batch_id, amount));
+}
+
+/// Publishes a `paused` event when the admin toggles the pause flag.
+///
+/// Topics: `("paused", admin)`; data: `paused` (the new flag value).
+pub fn paused(env: &Env, admin: &Address, paused: bool) {
+    let topics = (symbol_short!("paused"), admin.clone());
+    env.events().publish(topics, paused);
 }
