@@ -56,3 +56,28 @@ fn test_mint_batch_credits_issuer() {
     assert_eq!(client.balance_of(&issuer, &id), 1_000);
     assert_eq!(client.batch_count(), 1);
 }
+
+#[test]
+#[should_panic(expected = "Error(Contract, #4)")]
+fn test_mint_batch_zero_amount_fails() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let issuer = Address::generate(&env);
+    client.mint_batch(&issuer, &project_id(&env), &2024, &0, &5);
+}
+
+#[test]
+fn test_mint_batch_increments_ids() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let issuer = Address::generate(&env);
+    let first = client.mint_batch(&issuer, &project_id(&env), &2024, &100, &1);
+    let second = client.mint_batch(&issuer, &project_id(&env), &2025, &200, &2);
+    assert_eq!(first, 1);
+    assert_eq!(second, 2);
+    assert_eq!(client.batch_count(), 2);
+}
