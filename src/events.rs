@@ -1,3 +1,8 @@
+//! Event publishers for the CarbonMint contract.
+//!
+//! Each marketplace action emits a structured event so off-chain indexers can
+//! reconstruct registry state: `minted`, `listed`, `bought`, and `retired`.
+
 use soroban_sdk::{symbol_short, Address, Env};
 
 /// Publishes a `minted` event when a new batch is created.
