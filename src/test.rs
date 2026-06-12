@@ -245,6 +245,35 @@ fn test_list_updates_price() {
 }
 
 #[test]
+fn test_listing_info_reflects_state() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let issuer = Address::generate(&env);
+    let buyer = Address::generate(&env);
+    let id = client.mint_batch(&issuer, &project_id(&env), &2024, &1_000, &5);
+
+    let listing = client.listing_info(&id);
+    assert_eq!(listing.batch_id, id);
+    assert_eq!(listing.seller, issuer);
+    assert_eq!(listing.price, 5);
+    assert!(listing.listed);
+    assert_eq!(listing.available, 1_000);
+
+    // Selling reduces the seller's available amount.
+    client.buy(&buyer, &id, &300);
+    let listing = client.listing_info(&id);
+    assert_eq!(listing.available, 700);
+
+    // Delisting flips the listed flag but keeps the price.
+    client.unlist(&id);
+    let listing = client.listing_info(&id);
+    assert!(!listing.listed);
+    assert_eq!(listing.price, 5);
+}
+
+#[test]
 fn test_transfer_moves_credits() {
     let (env, client, admin) = setup();
     env.mock_all_auths();
