@@ -20,3 +20,18 @@ fn setup<'a>() -> (Env, CarbonMintContractClient<'a>, Address) {
 fn project_id(env: &Env) -> String {
     String::from_str(env, "PROJ-001")
 }
+
+#[test]
+fn test_initialize_sets_admin() {
+    let (_env, client, admin) = setup();
+    client.initialize(&admin);
+    assert_eq!(client.get_admin(), admin);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #1)")]
+fn test_initialize_twice_fails() {
+    let (_env, client, admin) = setup();
+    client.initialize(&admin);
+    client.initialize(&admin);
+}
