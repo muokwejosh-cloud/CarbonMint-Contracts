@@ -10,6 +10,8 @@ pub enum DataKey {
     BatchCounter,
     /// Counter for the next retirement certificate id (instance storage).
     RetirementCounter,
+    /// Whether minting is currently paused by the admin (instance storage).
+    Paused,
     /// A batch record keyed by batch id (persistent storage).
     Batch(u64),
     /// A balance keyed by (owner, batch id) (persistent storage).

@@ -79,6 +79,19 @@ pub fn set_retirement_counter(env: &Env, value: u64) {
         .set(&DataKey::RetirementCounter, &value);
 }
 
+/// Reads whether minting is currently paused, defaulting to `false`.
+pub fn get_paused(env: &Env) -> bool {
+    env.storage()
+        .instance()
+        .get(&DataKey::Paused)
+        .unwrap_or(false)
+}
+
+/// Writes the paused flag.
+pub fn set_paused(env: &Env, paused: bool) {
+    env.storage().instance().set(&DataKey::Paused, &paused);
+}
+
 /// Returns `true` if a batch with the given id exists.
 pub fn has_batch(env: &Env, id: u64) -> bool {
     env.storage().persistent().has(&DataKey::Batch(id))
