@@ -11,7 +11,9 @@ mod events;
 mod storage;
 mod types;
 
-use soroban_sdk::{contract, contractimpl, Env};
+use soroban_sdk::{contract, contractimpl, Address, Env};
+
+use crate::error::Error;
 
 #[contract]
 pub struct CarbonMintContract;
@@ -21,5 +23,18 @@ impl CarbonMintContract {
     /// Returns the contract version string.
     pub fn version(_env: Env) -> u32 {
         1
+    }
+
+    /// Initializes the registry with an `admin` address.
+    ///
+    /// The admin governs minting authorization. Calling this more than once
+    /// returns [`Error::AlreadyInitialized`].
+    pub fn initialize(env: Env, admin: Address) -> Result<(), Error> {
+        if storage::has_admin(&env) {
+            return Err(Error::AlreadyInitialized);
+        }
+        storage::set_admin(&env, &admin);
+        storage::extend_instance(&env);
+        Ok(())
     }
 }
