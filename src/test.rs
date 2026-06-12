@@ -29,6 +29,28 @@ fn test_initialize_sets_admin() {
 }
 
 #[test]
+fn test_set_admin_rotates_admin() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    let new_admin = Address::generate(&env);
+    client.set_admin(&new_admin);
+
+    assert_eq!(client.get_admin(), new_admin);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #2)")]
+fn test_set_admin_before_init_fails() {
+    let (env, client, _admin) = setup();
+    env.mock_all_auths();
+
+    let new_admin = Address::generate(&env);
+    client.set_admin(&new_admin);
+}
+
+#[test]
 #[should_panic(expected = "Error(Contract, #1)")]
 fn test_initialize_twice_fails() {
     let (_env, client, admin) = setup();
