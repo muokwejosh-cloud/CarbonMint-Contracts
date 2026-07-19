@@ -32,13 +32,7 @@ pub fn bought(
 /// Publishes a `retired` event when credits are permanently burned.
 ///
 /// Topics: `("retired", holder)`; data: `(batch_id, amount, certificate_id)`.
-pub fn retired(
-    env: &Env,
-    holder: &Address,
-    batch_id: u64,
-    amount: i128,
-    certificate_id: u64,
-) {
+pub fn retired(env: &Env, holder: &Address, batch_id: u64, amount: i128, certificate_id: u64) {
     let topics = (symbol_short!("retired"), holder.clone());
     env.events()
         .publish(topics, (batch_id, amount, certificate_id));

@@ -8,6 +8,7 @@
 
 mod error;
 mod events;
+pub mod math;
 mod storage;
 mod types;
 
@@ -123,9 +124,7 @@ impl CarbonMintContract {
             return Err(Error::InvalidAmount);
         }
 
-        let id = storage::get_batch_counter(&env)
-            .checked_add(1)
-            .ok_or(Error::Overflow)?;
+        let id = math::checked_add_u64(storage::get_batch_counter(&env), 1)?;
 
         let batch = Batch {
             id,
@@ -136,9 +135,7 @@ impl CarbonMintContract {
             price,
             listed: true,
         };
-        let total_minted = storage::get_total_minted(&env)
-            .checked_add(amount)
-            .ok_or(Error::Overflow)?;
+        let total_minted = math::checked_add(storage::get_total_minted(&env), amount)?;
 
         storage::set_batch(&env, &batch);
         storage::set_balance(&env, &issuer, id, amount);
@@ -276,12 +273,7 @@ impl CarbonMintContract {
     /// Requires authorization from `holder`. The holder's balance is reduced
     /// and the batch's running retired total is increased. The certificate
     /// names the holder as their own beneficiary.
-    pub fn retire(
-        env: Env,
-        holder: Address,
-        batch_id: u64,
-        amount: i128,
-    ) -> Result<u64, Error> {
+    pub fn retire(env: Env, holder: Address, batch_id: u64, amount: i128) -> Result<u64, Error> {
         let beneficiary = String::from_str(&env, types::SELF_BENEFICIARY);
         retire_credits(&env, &holder, batch_id, amount, beneficiary)
     }
@@ -363,7 +355,7 @@ impl CarbonMintContract {
     pub fn circulating_supply(env: Env, batch_id: u64) -> Result<i128, Error> {
         let batch = storage::get_batch(&env, batch_id).ok_or(Error::BatchNotFound)?;
         let retired = storage::get_total_retired(&env, batch_id);
-        batch.supply.checked_sub(retired).ok_or(Error::Overflow)
+        math::checked_sub(batch.supply, retired)
     }
 }
 
@@ -394,17 +386,13 @@ fn retire_credits(
         return Err(Error::InsufficientBalance);
     }
 
-    let new_balance = balance.checked_sub(amount).ok_or(Error::Overflow)?;
+    let new_balance = math::checked_sub(balance, amount)?;
     storage::set_balance(env, holder, batch_id, new_balance);
 
-    let retired_total = storage::get_total_retired(env, batch_id)
-        .checked_add(amount)
-        .ok_or(Error::Overflow)?;
+    let retired_total = math::checked_add(storage::get_total_retired(env, batch_id), amount)?;
     storage::set_total_retired(env, batch_id, retired_total);
 
-    let cert_id = storage::get_retirement_counter(env)
-        .checked_add(1)
-        .ok_or(Error::Overflow)?;
+    let cert_id = math::checked_add_u64(storage::get_retirement_counter(env), 1)?;
     let cert = Retirement {
         id: cert_id,
         batch_id,
