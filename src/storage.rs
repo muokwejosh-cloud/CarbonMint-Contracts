@@ -7,6 +7,7 @@
 
 use soroban_sdk::{Address, Env};
 
+use crate::math;
 use crate::types::{Batch, DataKey, Retirement};
 
 /// Number of ledgers (~5s each) after which persistent entries expire if not
@@ -59,9 +60,7 @@ pub fn get_batch_counter(env: &Env) -> u64 {
 
 /// Writes the batch counter.
 pub fn set_batch_counter(env: &Env, value: u64) {
-    env.storage()
-        .instance()
-        .set(&DataKey::BatchCounter, &value);
+    env.storage().instance().set(&DataKey::BatchCounter, &value);
 }
 
 /// Reads the current retirement counter (number of certificates issued).
@@ -156,8 +155,11 @@ pub fn move_balance(env: &Env, from: &Address, to: &Address, batch_id: u64, amou
         return false;
     }
     let to_balance = get_balance(env, to, batch_id);
-    match (from_balance.checked_sub(amount), to_balance.checked_add(amount)) {
-        (Some(new_from), Some(new_to)) => {
+    match (
+        math::checked_sub(from_balance, amount),
+        math::checked_add(to_balance, amount),
+    ) {
+        (Ok(new_from), Ok(new_to)) => {
             set_balance(env, from, batch_id, new_from);
             set_balance(env, to, batch_id, new_to);
             true
