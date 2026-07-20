@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Automated testnet deployment smoke script (`scripts/smoke-test-testnet.sh`) 
+  with standalone mock tests.
 - Storage schema versioning: `storage_schema_version()` view and a persisted
   `StorageSchemaVersion` instance key, written on `initialize`, so indexers can
   detect storage-layout migrations (issue #48).

@@ -5,7 +5,7 @@ NETWORK      ?= testnet
 SOURCE       ?= default
 CONTRACT_ID  ?=
 
-.PHONY: all build check test fmt fmt-check clippy doc clean deploy optimize wasm-size verify-wasm-hash shellcheck test-verify
+.PHONY: all build check test fmt fmt-check clippy doc clean deploy optimize wasm-size verify-wasm-hash shellcheck test-verify test-smoke
 
 all: build
 
@@ -57,5 +57,8 @@ endif
 
 test-verify:
 	./scripts/test-verify-wasm-hash.sh
+
+test-smoke:
+	./scripts/test-smoke-test-testnet.sh
 coverage:
 	cargo tarpaulin --config tarpaulin.toml --workspace --timeout 120
