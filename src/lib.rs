@@ -13,6 +13,9 @@ mod storage;
 mod types;
 
 #[cfg(test)]
+mod bench_support;
+
+#[cfg(test)]
 mod fuzz_harness;
 
 #[cfg(test)]

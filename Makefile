@@ -5,7 +5,7 @@ NETWORK      ?= testnet
 SOURCE       ?= default
 CONTRACT_ID  ?=
 
-.PHONY: all build check test fmt fmt-check clippy doc clean deploy optimize wasm-size verify-wasm-hash shellcheck test-verify
+.PHONY: all build check test bench fmt fmt-check clippy doc clean deploy optimize wasm-size verify-wasm-hash shellcheck test-verify
 
 all: build
 
@@ -17,6 +17,9 @@ check:
 
 test:
 	cargo test
+
+bench:
+	cargo bench --bench buy_benchmark
 
 fmt:
 	cargo fmt --all

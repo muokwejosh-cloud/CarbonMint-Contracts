@@ -7,7 +7,8 @@ use soroban_sdk::{
 
 use crate::types::TransferItem;
 use crate::{CarbonMintContract, CarbonMintContractClient};
-use crate::fuzz_harness::setup_contract;
+use crate::bench_support::setup_contract;
+use crate::fuzz_harness::setup_contract as setup_fuzz_contract;
 
 /// Registers the contract and returns its client together with the env.
 fn setup<'a>() -> (Env, CarbonMintContractClient<'a>, Address) {
@@ -24,8 +25,17 @@ fn project_id(env: &Env) -> String {
 }
 
 #[test]
-fn test_fuzz_harness_helper_sets_up_contract() {
+fn test_benchmark_support_helper_sets_up_contract() {
     let (env, client, admin) = setup_contract();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    assert_eq!(client.get_admin(), admin);
+}
+
+#[test]
+fn test_fuzz_harness_helper_sets_up_contract() {
+    let (env, client, admin) = setup_fuzz_contract();
     env.mock_all_auths();
     client.initialize(&admin);
 
