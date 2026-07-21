@@ -31,10 +31,13 @@ use crate::Error;
 /// # Examples
 ///
 /// ```ignore
-/// use carbonmint_contract::math;
+/// use carbonmint_contract::{math, Error};
 ///
-/// assert_eq!(math::checked_add(10i128, 20i128).unwrap(), 30);
-/// assert!(math::checked_add(i128::MAX, 1).is_err());
+/// fn main() -> Result<(), Error> {
+///     assert_eq!(math::checked_add(10i128, 20i128)?, 30);
+///     assert!(math::checked_add(i128::MAX, 1).is_err());
+///     Ok(())
+/// }
 /// ```
 #[inline]
 pub fn checked_add(a: i128, b: i128) -> Result<i128, Error> {
@@ -48,10 +51,13 @@ pub fn checked_add(a: i128, b: i128) -> Result<i128, Error> {
 /// # Examples
 ///
 /// ```ignore
-/// use carbonmint_contract::math;
+/// use carbonmint_contract::{math, Error};
 ///
-/// assert_eq!(math::checked_sub(30i128, 10i128).unwrap(), 20);
-/// assert!(math::checked_sub(0i128, 1).is_err());
+/// fn main() -> Result<(), Error> {
+///     assert_eq!(math::checked_sub(30i128, 10i128)?, 20);
+///     assert!(math::checked_sub(0i128, 1).is_err());
+///     Ok(())
+/// }
 /// ```
 #[inline]
 pub fn checked_sub(a: i128, b: i128) -> Result<i128, Error> {
@@ -65,10 +71,13 @@ pub fn checked_sub(a: i128, b: i128) -> Result<i128, Error> {
 /// # Examples
 ///
 /// ```ignore
-/// use carbonmint_contract::math;
+/// use carbonmint_contract::{math, Error};
 ///
-/// assert_eq!(math::checked_mul(10i128, 3i128).unwrap(), 30);
-/// assert!(math::checked_mul(i128::MAX, 2).is_err());
+/// fn main() -> Result<(), Error> {
+///     assert_eq!(math::checked_mul(10i128, 3i128)?, 30);
+///     assert!(math::checked_mul(i128::MAX, 2).is_err());
+///     Ok(())
+/// }
 /// ```
 #[inline]
 pub fn checked_mul(a: i128, b: i128) -> Result<i128, Error> {
@@ -83,10 +92,13 @@ pub fn checked_mul(a: i128, b: i128) -> Result<i128, Error> {
 /// # Examples
 ///
 /// ```ignore
-/// use carbonmint_contract::math;
+/// use carbonmint_contract::{math, Error};
 ///
-/// assert_eq!(math::checked_div(30i128, 3i128).unwrap(), 10);
-/// assert!(math::checked_div(1i128, 0).is_err());
+/// fn main() -> Result<(), Error> {
+///     assert_eq!(math::checked_div(30i128, 3i128)?, 10);
+///     assert!(math::checked_div(1i128, 0).is_err());
+///     Ok(())
+/// }
 /// ```
 #[inline]
 pub fn checked_div(a: i128, b: i128) -> Result<i128, Error> {
@@ -138,10 +150,13 @@ pub fn saturating_sub(a: i128, b: i128) -> i128 {
 /// # Examples
 ///
 /// ```ignore
-/// use carbonmint_contract::math;
+/// use carbonmint_contract::{math, Error};
 ///
-/// assert_eq!(math::checked_add_u64(5u64, 3u64).unwrap(), 8);
-/// assert!(math::checked_add_u64(u64::MAX, 1).is_err());
+/// fn main() -> Result<(), Error> {
+///     assert_eq!(math::checked_add_u64(5u64, 3u64)?, 8);
+///     assert!(math::checked_add_u64(u64::MAX, 1).is_err());
+///     Ok(())
+/// }
 /// ```
 #[inline]
 pub fn checked_add_u64(a: u64, b: u64) -> Result<u64, Error> {
@@ -169,16 +184,26 @@ pub fn saturating_add_u64(a: u64, b: u64) -> u64 {
 mod tests {
     use super::*;
 
+    fn assert_ok<T>(result: Result<T, Error>, expected: T)
+    where
+        T: PartialEq + std::fmt::Debug,
+    {
+        match result {
+            Ok(actual) => assert_eq!(actual, expected),
+            Err(err) => panic!("expected success but got Err({err:?})"),
+        }
+    }
+
     // -----------------------------------------------------------------------
     // checked_add
     // -----------------------------------------------------------------------
     #[test]
     fn test_checked_add_ok() {
-        assert_eq!(checked_add(10i128, 20i128).unwrap(), 30);
-        assert_eq!(checked_add(0i128, 0i128).unwrap(), 0);
-        assert_eq!(checked_add(-5i128, 3i128).unwrap(), -2);
-        assert_eq!(checked_add(i128::MAX - 1, 1).unwrap(), i128::MAX);
-        assert_eq!(checked_add(i128::MIN, 1).unwrap(), i128::MIN + 1);
+        assert_ok(checked_add(10i128, 20i128), 30);
+        assert_ok(checked_add(0i128, 0i128), 0);
+        assert_ok(checked_add(-5i128, 3i128), -2);
+        assert_ok(checked_add(i128::MAX - 1, 1), i128::MAX);
+        assert_ok(checked_add(i128::MIN, 1), i128::MIN + 1);
     }
 
     #[test]
@@ -192,10 +217,10 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn test_checked_sub_ok() {
-        assert_eq!(checked_sub(30i128, 10i128).unwrap(), 20);
-        assert_eq!(checked_sub(0i128, 0i128).unwrap(), 0);
-        assert_eq!(checked_sub(-5i128, -10i128).unwrap(), 5);
-        assert_eq!(checked_sub(i128::MIN + 1, 1).unwrap(), i128::MIN);
+        assert_ok(checked_sub(30i128, 10i128), 20);
+        assert_ok(checked_sub(0i128, 0i128), 0);
+        assert_ok(checked_sub(-5i128, -10i128), 5);
+        assert_ok(checked_sub(i128::MIN + 1, 1), i128::MIN);
     }
 
     #[test]
@@ -210,10 +235,10 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn test_checked_mul_ok() {
-        assert_eq!(checked_mul(10i128, 3i128).unwrap(), 30);
-        assert_eq!(checked_mul(-5i128, 3i128).unwrap(), -15);
-        assert_eq!(checked_mul(0i128, 100i128).unwrap(), 0);
-        assert_eq!(checked_mul(1i128, 1i128).unwrap(), 1);
+        assert_ok(checked_mul(10i128, 3i128), 30);
+        assert_ok(checked_mul(-5i128, 3i128), -15);
+        assert_ok(checked_mul(0i128, 100i128), 0);
+        assert_ok(checked_mul(1i128, 1i128), 1);
     }
 
     #[test]
@@ -227,9 +252,9 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn test_checked_div_ok() {
-        assert_eq!(checked_div(30i128, 3i128).unwrap(), 10);
-        assert_eq!(checked_div(-30i128, 3i128).unwrap(), -10);
-        assert_eq!(checked_div(0i128, 100i128).unwrap(), 0);
+        assert_ok(checked_div(30i128, 3i128), 10);
+        assert_ok(checked_div(-30i128, 3i128), -10);
+        assert_ok(checked_div(0i128, 100i128), 0);
     }
 
     #[test]
@@ -286,9 +311,9 @@ mod tests {
     // -----------------------------------------------------------------------
     #[test]
     fn test_checked_add_u64_ok() {
-        assert_eq!(checked_add_u64(5u64, 3u64).unwrap(), 8);
-        assert_eq!(checked_add_u64(0u64, 0u64).unwrap(), 0);
-        assert_eq!(checked_add_u64(u64::MAX - 1, 1).unwrap(), u64::MAX);
+        assert_ok(checked_add_u64(5u64, 3u64), 8);
+        assert_ok(checked_add_u64(0u64, 0u64), 0);
+        assert_ok(checked_add_u64(u64::MAX - 1, 1), u64::MAX);
     }
 
     #[test]

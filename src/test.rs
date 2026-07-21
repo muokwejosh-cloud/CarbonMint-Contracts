@@ -237,7 +237,7 @@ fn test_retire_insufficient_balance_fails() {
 }
 
 #[test]
-fn test_buy_requires_buyer_auth() {
+fn test_buy_requires_buyer_auth() -> Result<(), String> {
     let (env, client, admin) = setup();
     env.mock_all_auths();
     client.initialize(&admin);
@@ -250,7 +250,9 @@ fn test_buy_requires_buyer_auth() {
 
     // The most recent authorization must be the buyer authorizing `buy`.
     let auths = env.auths();
-    let (addr, invocation) = auths.last().expect("expected an authorization");
+    let Some((addr, invocation)) = auths.last() else {
+        return Err("expected an authorization".to_string());
+    };
     assert_eq!(addr, &buyer);
     assert_eq!(
         invocation.function,
@@ -262,6 +264,7 @@ fn test_buy_requires_buyer_auth() {
     );
     // Buyer only authorizes the top-level call, no sub-invocations.
     assert!(invocation.sub_invocations.is_empty());
+    Ok(())
 }
 
 #[test]
@@ -517,6 +520,9 @@ fn test_storage_schema_version_persisted_on_init() {
     client.initialize(&admin);
     // storage_schema_version is written to instance storage during init.
     assert_eq!(client.storage_schema_version(), 1);
+}
+
+#[test]
 fn test_set_admin_emits_adminset_event() {
     let (env, client, admin) = setup();
     env.mock_all_auths();
