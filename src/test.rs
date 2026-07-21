@@ -270,7 +270,9 @@ fn test_buy_requires_buyer_auth() {
 
     // The most recent authorization must be the buyer authorizing `buy`.
     let auths = env.auths();
-    let (addr, invocation) = auths.last().expect("expected an authorization");
+    let Some((addr, invocation)) = auths.last() else {
+        panic!("expected an authorization");
+    };
     assert_eq!(addr, &buyer);
     assert_eq!(
         invocation.function,
