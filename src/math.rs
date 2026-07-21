@@ -292,7 +292,8 @@ mod tests {
     }
 
     #[test]
-    fn test_checked_add_u64_overflow() {
+    fn test_checked_add_u64_boundary_values() {
+        assert_eq!(checked_add_u64(0u64, u64::MAX), Ok(u64::MAX));
         assert_eq!(checked_add_u64(u64::MAX, 1), Err(Error::Overflow));
     }
 
