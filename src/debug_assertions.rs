@@ -190,7 +190,19 @@ mod tests {
         ];
         for &variant in cases {
             let result: Result<i128, Error> = Err(variant);
-            assert_err!(result, Error::AlreadyInitialized | Error::NotInitialized | Error::BatchNotFound | Error::InvalidAmount | Error::InsufficientBalance | Error::Unauthorized | Error::Overflow | Error::NotListed | Error::Paused | Error::SameAccount);
+            assert_err!(
+                result,
+                Error::AlreadyInitialized
+                    | Error::NotInitialized
+                    | Error::BatchNotFound
+                    | Error::InvalidAmount
+                    | Error::InsufficientBalance
+                    | Error::Unauthorized
+                    | Error::Overflow
+                    | Error::NotListed
+                    | Error::Paused
+                    | Error::SameAccount
+            );
         }
     }
 }

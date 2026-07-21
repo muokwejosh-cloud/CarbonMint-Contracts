@@ -83,41 +83,25 @@ pub struct Listing {
     pub available: i128,
 }
 
+/// A single operation in a batch.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum BatchOp {
+    /// Buy credits from a listing: (buyer, batch_id, amount).
+    Buy(Address, u64, i128),
+    /// Retire credits: (holder, batch_id, amount).
+    Retire(Address, u64, i128),
+    /// Transfer credits to another address: (from, to, batch_id, amount).
+    Transfer(Address, Address, u64, i128),
+    /// List credits for sale: (batch_id, price).
+    List(u64, i128),
+    /// Unlist credits from sale: (batch_id).
+    Unlist(u64),
+}
+
 /// A retirement certificate recording the permanent burning of credits.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
-/// A single operation in a batch.
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum BatchOp {
-    /// Buy credits from a listing.
-    Buy { buyer: Address, batch_id: u64, amount: i128 },
-    /// Retire credits.
-    Retire { holder: Address, batch_id: u64, amount: i128 },
-    /// Transfer credits to another address.
-    Transfer { from: Address, to: Address, batch_id: u64, amount: i128 },
-    /// List credits for sale.
-    List { batch_id: u64, price: i128 },
-    /// Unlist credits from sale.
-    Unlist { batch_id: u64 },
-}
-
-/// A single operation in a batch.
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum BatchOp {
-    /// Buy credits from a listing.
-    Buy { buyer: Address, batch_id: u64, amount: i128 },
-    /// Retire credits.
-    Retire { holder: Address, batch_id: u64, amount: i128 },
-    /// Transfer credits to another address.
-    Transfer { from: Address, to: Address, batch_id: u64, amount: i128 },
-    /// List credits for sale.
-    List { batch_id: u64, price: i128 },
-    /// Unlist credits from sale.
-    Unlist { batch_id: u64 },
-}
-
 pub struct Retirement {
     /// Unique certificate identifier.
     pub id: u64,

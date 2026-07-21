@@ -25,7 +25,7 @@ mod test;
 use soroban_sdk::{contract, contractimpl, contractmeta, Address, Env, String, Vec};
 
 pub use crate::error::Error;
-pub use crate::types::{Batch, Listing, Retirement, TransferItem};
+pub use crate::types::{Batch, BatchOp, Listing, Retirement, TransferItem};
 
 /// Monotonic on-chain version of the contract logic.
 ///
@@ -407,19 +407,19 @@ impl CarbonMintContract {
     pub fn batch_operations(env: Env, ops: Vec<BatchOp>) -> Result<(), Error> {
         for op in ops.iter() {
             match op {
-                BatchOp::Buy { buyer, batch_id, amount } => {
+                BatchOp::Buy(buyer, batch_id, amount) => {
                     Self::buy(env.clone(), buyer, batch_id, amount)?;
                 }
-                BatchOp::Retire { holder, batch_id, amount } => {
+                BatchOp::Retire(holder, batch_id, amount) => {
                     Self::retire(env.clone(), holder, batch_id, amount)?;
                 }
-                BatchOp::Transfer { from, to, batch_id, amount } => {
+                BatchOp::Transfer(from, to, batch_id, amount) => {
                     Self::transfer(env.clone(), from, to, batch_id, amount)?;
                 }
-                BatchOp::List { batch_id, price } => {
+                BatchOp::List(batch_id, price) => {
                     Self::list(env.clone(), batch_id, price)?;
                 }
-                BatchOp::Unlist { batch_id } => {
+                BatchOp::Unlist(batch_id) => {
                     Self::unlist(env.clone(), batch_id)?;
                 }
             }

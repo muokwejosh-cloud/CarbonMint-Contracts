@@ -3,10 +3,10 @@ use soroban_sdk::{
     vec, Address, Env, IntoVal, String, Symbol,
 };
 
-use crate::types::TransferItem;
-use crate::{CarbonMintContract, CarbonMintContractClient};
 use crate::bench_support::setup_contract;
 use crate::fuzz_harness::setup_contract as setup_fuzz_contract;
+use crate::types::TransferItem;
+use crate::{CarbonMintContract, CarbonMintContractClient};
 
 /// Registers the contract and returns its client together with the env.
 fn setup<'a>() -> (Env, CarbonMintContractClient<'a>, Address) {
@@ -635,8 +635,6 @@ fn test_list_negative_price_fails() {
 // batch_transfer tests
 // ---------------------------------------------------------------------------
 
-#[test]
-fn test_batch_transfer_to_multiple_recipients() {
 // Maximum-value arithmetic paths (contract-level)
 // ---------------------------------------------------------------------------
 // These tests drive the contract through the largest legal i128 amounts to
@@ -679,7 +677,11 @@ fn test_mint_batch_max_i128_supply_succeeds() {
 }
 
 #[test]
-fn test_batch_transfer_single_recipient() {
+fn test_mint_batch_max_i128_supply() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+    let issuer = Address::generate(&env);
     let id = client.mint_batch(&issuer, &project_id(&env), &2024, &i128::MAX, &1);
     assert_eq!(id, 1);
 
@@ -754,8 +756,12 @@ fn test_transfer_entire_max_supply_succeeds() {
 }
 
 #[test]
-#[should_panic(expected = "Error(Contract, #11)")]
-fn test_batch_transfer_zero_recipients_fails() {
+fn test_transfer_full_max_i128_balance() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+    let issuer = Address::generate(&env);
+    let recipient = Address::generate(&env);
     let id = client.mint_batch(&issuer, &project_id(&env), &2024, &i128::MAX, &1);
 
     client.transfer(&issuer, &recipient, &id, &i128::MAX);
@@ -771,7 +777,8 @@ fn test_batch_transfer_zero_recipients_fails() {
 /// `checked_add(0, i128::MAX)` (total_retired counter), and
 /// `checked_sub(i128::MAX, i128::MAX)` again inside `circulating_supply`.
 #[test]
-fn test_retire_entire_max_supply_succeeds() {
+#[should_panic(expected = "Error(Contract, #11)")]
+fn test_batch_transfer_zero_recipients_fails() {
     let (env, client, admin) = setup();
     env.mock_all_auths();
     client.initialize(&admin);
@@ -850,8 +857,11 @@ fn test_batch_transfer_unknown_batch_fails() {
 }
 
 #[test]
-#[should_panic(expected = "Error(Contract, #5)")]
-fn test_batch_transfer_insufficient_aggregate_balance_fails() {
+fn test_retire_full_max_i128_balance() {
+    let (env, client, admin) = setup();
+    env.mock_all_auths();
+    client.initialize(&admin);
+    let issuer = Address::generate(&env);
     let id = client.mint_batch(&issuer, &project_id(&env), &2024, &i128::MAX, &1);
 
     let cert_id = client.retire(&issuer, &id, &i128::MAX);
@@ -956,8 +966,8 @@ fn test_batch_transfer_requires_from_auth() {
 }
 
 #[test]
-#[should_panic(expected = "Error(Contract, #11)")]
-fn test_batch_transfer_exceeds_max_recipients_fails() {
+#[should_panic(expected = "Error(Contract, #7)")]
+fn test_retire_then_over_retire_is_rejected() {
     let (env, client, admin) = setup();
     env.mock_all_auths();
     client.initialize(&admin);
@@ -969,16 +979,14 @@ fn test_batch_transfer_exceeds_max_recipients_fails() {
     let mut recipients = vec![&env];
     for _ in 0..51 {
         let to = Address::generate(&env);
-        recipients.push_back(TransferItem {
-            to,
-            amount: 1,
-        });
+        recipients.push_back(TransferItem { to, amount: 1 });
     }
-    client.batch_transfer(&issuer, &id, &recipients);
     let id = client.mint_batch(&issuer, &project_id(&env), &2024, &i128::MAX, &1);
     client.retire(&issuer, &id, &i128::MAX);
     // Balance is now 0; even 1 more should trigger InsufficientBalance.
     client.retire(&issuer, &id, &1);
+}
+
 // Deployment-funding invariants
 //
 // These tests verify properties that operators depend on when scripting a
@@ -995,8 +1003,8 @@ fn test_batch_transfer_exceeds_max_recipients_fails() {
 fn test_version_returns_current_version() {
     let (_env, client, admin) = setup();
     client.initialize(&admin);
-    // VERSION = 2 as defined in src/lib.rs.
-    assert_eq!(client.version(), 2);
+    // VERSION = 3 as defined in src/lib.rs.
+    assert_eq!(client.version(), 3);
 }
 
 /// `storage_schema_version()` must equal 1 immediately after `initialize` and

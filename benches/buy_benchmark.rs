@@ -19,7 +19,8 @@ fn buy_entrypoint_benchmark(c: &mut Criterion) {
 
                 env.mock_all_auths();
                 client.initialize(&admin);
-                let batch_id = client.mint_batch(&issuer, &project_id, &2024u32, &10_000i128, &5i128);
+                let batch_id =
+                    client.mint_batch(&issuer, &project_id, &2024u32, &10_000i128, &5i128);
 
                 (env, client, buyer, batch_id)
             },
