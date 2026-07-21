@@ -1,6 +1,5 @@
 #![no_std]
-#![deny(clippy::unwrap_used)]
-#![deny(clippy::expect_used)]
+#![deny(clippy::unwrap_used, clippy::expect_used)]
 
 //! # CarbonMint
 //!

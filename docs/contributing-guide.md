@@ -22,8 +22,8 @@ Contract changes may include:
   behavior that affects state transitions or public API surface.
 - Keep changes aligned with the repository's Soroban/Soroban SDK 21.x setup and
   the existing contract conventions around checked arithmetic, auth, and errors.
-- Prefer returning explicit `Result`/`Error` values over panicking helpers such as
-  `unwrap()` or `expect()` in contract-facing code and tests.
+- Prefer returning explicit `Result`/`Error` values over panic helpers such as
+  `unwrap()` or `expect()` in contract code.
 
 ## Recommended workflow
 
@@ -59,6 +59,8 @@ make doc
 When making contract changes, review the following before submitting:
 
 - State-changing entrypoints should continue to require the appropriate auth.
+- Panic helpers such as `unwrap()` and `expect()` are treated as lint violations
+  and should be replaced with explicit error handling.
 - Invariants around balances, totals, and retirement accounting should remain intact.
 - New or changed errors should be documented and tested.
 - Event topics and payloads should remain consistent with existing indexer assumptions.
