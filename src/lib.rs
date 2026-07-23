@@ -1,4 +1,5 @@
 #![no_std]
+#![deny(clippy::unwrap_used, clippy::expect_used)]
 
 //! # CarbonMint
 //!
@@ -11,6 +12,12 @@ mod events;
 pub mod math;
 mod storage;
 mod types;
+
+#[cfg(test)]
+mod bench_support;
+
+#[cfg(test)]
+mod fuzz_harness;
 
 #[cfg(test)]
 mod test;

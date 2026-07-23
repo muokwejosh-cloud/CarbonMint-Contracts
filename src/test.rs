@@ -1,4 +1,5 @@
 #![cfg(test)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use soroban_sdk::{
     testutils::{Address as _, AuthorizedFunction, Events},
@@ -6,6 +7,8 @@ use soroban_sdk::{
 };
 
 use crate::{CarbonMintContract, CarbonMintContractClient};
+use crate::bench_support::setup_contract;
+use crate::fuzz_harness::setup_contract as setup_fuzz_contract;
 
 /// Registers the contract and returns its client together with the env.
 fn setup<'a>() -> (Env, CarbonMintContractClient<'a>, Address) {
@@ -19,6 +22,24 @@ fn setup<'a>() -> (Env, CarbonMintContractClient<'a>, Address) {
 /// Convenience helper to build a project id string in tests.
 fn project_id(env: &Env) -> String {
     String::from_str(env, "PROJ-001")
+}
+
+#[test]
+fn test_benchmark_support_helper_sets_up_contract() {
+    let (env, client, admin) = setup_contract();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    assert_eq!(client.get_admin(), admin);
+}
+
+#[test]
+fn test_fuzz_harness_helper_sets_up_contract() {
+    let (env, client, admin) = setup_fuzz_contract();
+    env.mock_all_auths();
+    client.initialize(&admin);
+
+    assert_eq!(client.get_admin(), admin);
 }
 
 #[test]
@@ -250,7 +271,9 @@ fn test_buy_requires_buyer_auth() {
 
     // The most recent authorization must be the buyer authorizing `buy`.
     let auths = env.auths();
-    let (addr, invocation) = auths.last().expect("expected an authorization");
+    let Some((addr, invocation)) = auths.last() else {
+        panic!("expected an authorization");
+    };
     assert_eq!(addr, &buyer);
     assert_eq!(
         invocation.function,
